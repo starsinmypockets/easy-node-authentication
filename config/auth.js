@@ -19,6 +19,11 @@ module.exports = {
         'clientID'         : 'your-secret-clientID-here',
         'clientSecret'     : 'your-client-secret-here',
         'callbackURL'      : 'http://localhost:8080/auth/google/callback'
-    }
+    },
 
+    'levelwareAuth' : {
+        'clientID'         : 'dc4e1bb0-a820-4ca9-8232-a6f0d864ac9f',
+        'clientSecret'     : 'bsPGajNjKAgZr6mL',
+        'callbackURL'      : 'http://localhost:8080/auth/levelware/callback'
+    }
 };

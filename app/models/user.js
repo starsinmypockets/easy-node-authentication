@@ -26,8 +26,13 @@ var userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
+    },
+   levelware         : {
+        id           : String,
+        token        : String,
+        email        : String,
+        name         : String
     }
-
 });
 
 // generating a hash

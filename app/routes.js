@@ -88,6 +88,19 @@ module.exports = function(app, passport) {
                 failureRedirect : '/'
             }));
 
+    // LEVELWARE ---------------------------------
+
+        // send to google to do the authentication
+        app.get('/auth/levelware', passport.authenticate('levelware', { scope : ['profile', 'delmondo'] }));
+
+        // the callback after google has authenticated the user
+        app.get('/auth/levelware/callback',
+            passport.authenticate('levelware', {
+                successRedirect : '/profile',
+                failureRedirect : '/'
+            }));
+
+
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
@@ -127,7 +140,7 @@ module.exports = function(app, passport) {
             }));
 
 
-    // google ---------------------------------
+   // google ---------------------------------
 
         // send to google to do the authentication
         app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
@@ -135,6 +148,18 @@ module.exports = function(app, passport) {
         // the callback after google has authorized the user
         app.get('/connect/google/callback',
             passport.authorize('google', {
+                successRedirect : '/profile',
+                failureRedirect : '/'
+            }));
+
+   // LEVELWARE ---------------------------------
+
+        // send to LEVELWARE to do the authentication
+        app.get('/connect/levelware', passport.authorize('levelware', { scope : ['delmondo', 'profile'] }));
+
+        // the callback after google has authorized the user
+        app.get('/connect/levelware/callback',
+            passport.authorize('levelware', {
                 successRedirect : '/profile',
                 failureRedirect : '/'
             }));
@@ -182,6 +207,16 @@ module.exports = function(app, passport) {
             res.redirect('/profile');
         });
     });
+    
+    // LEVELWARE ---------------------------------
+    app.get('/unlink/levelware', isLoggedIn, function(req, res) {
+        var user          = req.user;
+        user.levelware.token = undefined;
+        user.save(function(err) {
+            res.redirect('/profile');
+        });
+    });
+
 
 
 };
