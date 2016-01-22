@@ -1,5 +1,16 @@
-# Easy Node Authentication
+# Easy Node Authentication - now with LEVELWARE!!
 
+## Levelware notes
+Use install directions below...
+Signup with a new account or login with existing...
+Clicking the levelware link from profile will:
+
+• do dialog for access token (requires user authentication at levelware site)
+• the redirect will then generate an access token and get the users deal summary 
+  and the first deal in their account, returning a json object for each
+
+
+## Original tutorial notes follow...
 Code for the entire scotch.io tutorial series: Complete Guide to Node Authentication
 
 We will be using Passport to authenticate users locally, with Facebook, Twitter, and Google.

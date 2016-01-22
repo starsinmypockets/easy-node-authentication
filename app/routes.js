@@ -88,18 +88,6 @@ module.exports = function(app, passport) {
                 failureRedirect : '/'
             }));
 
-    // LEVELWARE ---------------------------------
-
-        // send to google to do the authentication
-        app.get('/auth/levelware', passport.authenticate('levelware', { scope : ['profile', 'delmondo'] }));
-
-        // the callback after google has authenticated the user
-        app.get('/auth/levelware/callback',
-            passport.authenticate('levelware', {
-                successRedirect : '/profile',
-                failureRedirect : '/'
-            }));
-
 
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
@@ -153,16 +141,22 @@ module.exports = function(app, passport) {
             }));
 
    // LEVELWARE ---------------------------------
-
-        // send to LEVELWARE to do the authentication
-        app.get('/connect/levelware', passport.authorize('levelware', { scope : ['delmondo', 'profile'] }));
+   // @@NOTE We're only doing authentication to get an access_token for the user 
+   //        NOT for login to your App - use access_token to access user resources
+   //        Use refresh_token to get new access token if access token expires
+        
+        app.get('/connect/levelware', passport.authenticate('levelware', { scope : ['read-only', 'profile'] }));
 
         // the callback after google has authorized the user
-        app.get('/connect/levelware/callback',
-            passport.authorize('levelware', {
-                successRedirect : '/profile',
-                failureRedirect : '/'
-            }));
+        app.get('/connect/levelware/callback', function (req, res) {
+          var http = require('http');
+          // @@STUB for req.user - I'm assuming there will be a session user available still here!
+          var user = {
+            'username' : 'pjwalker76@gmail.com',
+          }
+
+          console.log('levelware callback!', req.user, req.query);
+        });
 
 // =============================================================================
 // UNLINK ACCOUNTS =============================================================

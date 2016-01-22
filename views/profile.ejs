@@ -83,6 +83,26 @@
             </div>
         </div>
 
+        <!-- LEVELWARE INFORMATION -->
+        <div class="col-sm-6">
+            <div class="well">
+                <h3 class="text-info"><span class="strong"></span>Levelware</h3>
+
+                <% if (user.levelware.token) { %>
+                    <p>
+                        <strong>id</strong>: <%= user.levelware.id %><br>
+                        <strong>token</strong>: <%= user.levelware.token %><br>
+                        <strong>username</strong>: <%= user.levelware.username %>
+                    </p>
+
+                    <a href="/unlink/levelware" class="btn btn-info">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/levelware" class="btn btn-info">Connect LEVELWARE</a>
+                <% } %>
+
+            </div>
+        </div>
+
         <!-- GOOGLE INFORMATION -->
         <div class="col-sm-6">
             <div class="well">

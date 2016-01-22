@@ -3,6 +3,7 @@ var LocalStrategy    = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
+var LevelwareStrategy = require('../passport-levelware/lib/index.js').Strategy;
 
 // load up the user model
 var User       = require('../app/models/user');
@@ -138,6 +139,26 @@ module.exports = function(passport) {
         });
 
     }));
+
+
+    // =========================================================================
+    // LEVELWARE ===============================================================
+    // =========================================================================
+    passport.use(new LevelwareStrategy({
+        clientID        : configAuth.levelwareAuth.clientID,
+        clientSecret    : configAuth.levelwareAuth.clientSecret,
+        callbackURL     : configAuth.levelwareAuth.callbackURL,
+        profileFields   : ['id', 'firstName', 'lastName', 'email'],
+        passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+      }, function (req, token, refresh, profile, done) {
+        console.log("Hello Levelware Strategy!", 'token', token, 'refresh', refresh,'profile', profile,'done', typeof done);
+        process.nextTick(function() {
+            console.log("TICK", req.user);
+            return done(null, req.user);     
+        });
+      }
+    ));
+
 
     // =========================================================================
     // FACEBOOK ================================================================

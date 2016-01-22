@@ -24,6 +24,6 @@ module.exports = {
     'levelwareAuth' : {
         'clientID'         : 'dc4e1bb0-a820-4ca9-8232-a6f0d864ac9f',
         'clientSecret'     : 'bsPGajNjKAgZr6mL',
-        'callbackURL'      : 'http://localhost:8080/auth/levelware/callback'
+        'callbackURL'      : 'http://localhost:8081/auth/levelware/callback'
     }
 };
