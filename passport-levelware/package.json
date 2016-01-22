@@ -1,0 +1,23 @@
+{
+  "name": "passport-levelware",
+  "version": "0.1.0",
+  "description": "Levelware authentication strategy for passport",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@levelware-llc.git.beanstalkapp.com:/levelware-llc/passport-levelware.git"
+  },
+  "keywords": [
+    "passport",
+    "levelware",
+    "oauth2"
+  ],
+  "author": "Levelware, LLC",
+  "license": "MIT",
+  "dependencies": {
+    "passport-oauth2": "^1.1.2"
+  }
+}
