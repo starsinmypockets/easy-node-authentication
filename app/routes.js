@@ -1,5 +1,13 @@
+// @@STUB for DB backend
+var db = {
+  user : {
+    'username' : 'pjwalker76@gmail.com'
+  }
+}
+
 module.exports = function(app, passport) {
 
+          console.log('DIR', __dirname);
 // normal routes ===============================================================
 
     // show the home page (will also have our login links)
@@ -149,15 +157,34 @@ module.exports = function(app, passport) {
 
         // the callback after google has authorized the user
         app.get('/connect/levelware/callback', function (req, res) {
-          var http = require('http');
-          // @@STUB for req.user - I'm assuming there will be a session user available still here!
-          var user = {
-            'username' : 'pjwalker76@gmail.com',
-          }
-
-          console.log('levelware callback!', req.user, req.query);
+          var access_token;
+          
+          getLvlAccessToken(req.query.code, function (err, data) {
+            console.log('getAccessToken cb', err, data); 
+            // @@STUB for db backend - do some save magic here
+            db.user.levelware = {
+                accessToken : JSON.parse(data) // {accessToken : :tok, token_type : 'Bearer'}
+            };
+            res.json(db.user);
+          });
+        });
+        
+        // Test Bearer token - this shoud return a user object
+        app.get('/test/levelware/hasauth', function (req, res) {
+            console.log('test api 0', JSON.stringify(db));
+            testApiAccess({token : db.user.levelware.accessToken.access_token}, function (err, data) {
+              console.log('Test has access', err, data);
+              return res.json(JSON.parse(data));
+            });          
         });
 
+        app.get('/test/levelware/getdeals', function (req, res) {
+          
+        });
+
+        app.get('/test/levelware/deal/:id', function (req, res) {
+        
+        });
 // =============================================================================
 // UNLINK ACCOUNTS =============================================================
 // =============================================================================
@@ -221,4 +248,105 @@ function isLoggedIn(req, res, next) {
         return next();
 
     res.redirect('/');
+}
+
+
+/**
+ * Levelware integration examples
+ *
+ **/
+function getLvlAccessToken (code, fn) {
+  var resData;
+  var querystring = require('querystring');
+  var http = require('http');
+  var config = require('../config/auth');
+  var postData = querystring.stringify({
+    grant_type : 'authorization_code',
+    code : code,
+    client_id  : config.levelwareAuth.clientID,
+    client_secret : config.levelwareAuth.clientSecret
+  });
+  
+  console.log("post data", postData); 
+
+  var options = {
+      hostname: 'build.levelware.com',
+      port: 80,
+      path: '/server/oauth/token/',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': postData.length,
+      }
+  };
+
+  var rdata;
+  var r = http.request(options, function (response) {
+    console.log('status', response.statusCode);
+    console.log('HEADERS', JSON.stringify(response.headers));
+    response.setEncoding('utf8');
+    
+    response.on('data', function (chunk) {
+      console.log('chunk', chunk);
+      resData = chunk;
+    });
+    
+    response.on('end', function () {
+      console.log('No more data in response.')
+      fn(null, resData);
+    });
+  });
+  
+
+  r.on('error', function (err) {
+    console.log('problem with request', e.message);
+    fn(err);
+  });
+
+  // write data to request body
+  r.write(postData);
+  r.end();         
+}
+
+// authenticed api usage requires access token, client id and client secret
+function testApiAccess (opts, fn) {
+  console.log("test api 1", opts);
+  var resData;
+  var querystring = require('querystring');
+  var http = require('http');
+  var config = require('../config/auth');
+  
+  var options = {
+      hostname: 'build.levelware.com',
+      port: 80,
+      path: '/server/test/api1/',
+      method: 'GET',
+      headers: {
+          'Authorization' : 'Bearer ' + opts.token
+      }
+  };
+
+  var r = http.request(options, function (response) {
+    console.log('status', response.statusCode);
+    console.log('HEADERS', JSON.stringify(response.headers));
+    response.setEncoding('utf8');
+    
+    response.on('data', function (chunk) {
+      console.log('chunk', chunk);
+      resData = chunk;
+    });
+    
+    response.on('end', function () {
+      console.log('No more data in response.')
+      fn(null, resData);
+    });
+  });
+  
+
+  r.on('error', function (err) {
+    console.log('problem with request', e.message);
+    fn(err);
+  });
+
+  r.end();         
 }
