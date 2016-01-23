@@ -29,7 +29,7 @@ var userSchema = mongoose.Schema({
     },
    levelware         : {
         id           : String,
-        token        : String,
+        accessToken  : String,
         email        : String,
         name         : String
     }

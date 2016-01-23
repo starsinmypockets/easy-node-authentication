@@ -149,47 +149,32 @@ module.exports = function(app, passport) {
             }));
 
    // LEVELWARE ---------------------------------
-   // @@NOTE We're only doing authentication to get an access_token for the user 
-   //        NOT for login to your App - use access_token to access user resources
-   //        Use refresh_token to get new access token if access token expires
         
         app.get('/connect/levelware', passport.authenticate('levelware', { scope : ['read-only', 'profile'] }));
 
         // the callback after google has authorized the user
         app.get('/connect/levelware/callback', function (req, res) {
-          console.log('CALLBACK', req.user, req.session);
           var access_token;
-          var User = require('./models/user');
-
-          // @@ Use req.session here to get the proper user
-          User.findOne({'local.email' : 'pjwalker76@gmail.com'}).exec(function (err, user) {
-            console.log('get a user', err, user);
-          });
-
-          getLvlAccessToken(req.query.code, function (err, data) {
-            console.log('getAccessToken cb', err, data); 
-//            user.levelware = {
-//              accessToken : JSON.parse(data)
-//            }
-
-            // @@STUB for db backend - do some save magic here
-            // db.user.levelware = {
-            //    accessToken : JSON.parse(data) // {accessToken : :tok, token_type : 'Bearer'}
-            // };
-
-//            user.save(function (err) {
- //             res.json(db.user);
-  //          });
-          });
+          
+          getTestUser(function (sessionUser) {
+            // Now use the auth token and get an access token
+            getLvlAccessToken(req.query.code, function (err, data) {
+              sessionUser.levelware.accessToken = JSON.parse(data).access_token;
+              sessionUser.save(function (err) {
+                res.json(sessionUser.toObject());
+              });
+            });
+         });
         });
         
         // Test Bearer token - this shoud return a user object
         app.get('/test/levelware/hasauth', function (req, res) {
-            console.log('test api 0', JSON.stringify(db));
-            testApiAccess({token : db.user.levelware.accessToken.access_token}, function (err, data) {
-              console.log('Test has access', err, data);
-              return res.json(JSON.parse(data));
-            });          
+            getTestUser(function (sessionUser) { 
+              testApiAccess({accessToken : sessionUser.levelware.accessToken}, function (err, data) {
+                console.log('Test has access', err, data);
+                return res.json(JSON.parse(data));
+              });
+            });
         });
 
         app.get('/test/levelware/getdeals', function (req, res) {
@@ -245,10 +230,11 @@ module.exports = function(app, passport) {
     
     // LEVELWARE ---------------------------------
     app.get('/unlink/levelware', isLoggedIn, function(req, res) {
-        var user          = req.user;
-        user.levelware.token = undefined;
-        user.save(function(err) {
-            res.redirect('/profile');
+        getTestUser(function (sessionUser) {
+          sessionUser.levelware.token = undefined;
+          sessionUser.save(function(err) {
+              res.redirect('/profile');
+          });
         });
     });
 
@@ -336,7 +322,7 @@ function testApiAccess (opts, fn) {
       path: '/server/test/api1/',
       method: 'GET',
       headers: {
-          'Authorization' : 'Bearer ' + opts.token
+          'Authorization' : 'Bearer ' + opts.accessToken
       }
   };
 
@@ -364,3 +350,17 @@ function testApiAccess (opts, fn) {
 
   r.end();         
 }
+
+// This is a standin for session users or whatever method you are using
+function getTestUser(fn) {
+  var User = require('./models/user');
+  
+  // @@ Use req.session here to get the proper user
+  User.findOne({'local.email' : 'pjwalker76@gmail.com'}).exec(function (err, user) {
+    if (err) return fn(err);
+    console.log('get a user', err, user);
+    return fn(user);
+  });
+}
+
+
