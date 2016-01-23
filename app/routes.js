@@ -157,15 +157,29 @@ module.exports = function(app, passport) {
 
         // the callback after google has authorized the user
         app.get('/connect/levelware/callback', function (req, res) {
+          console.log('CALLBACK', req.user, req.session);
           var access_token;
-          
+          var User = require('./models/user');
+
+          // @@ Use req.session here to get the proper user
+          User.findOne({'local.email' : 'pjwalker76@gmail.com'}).exec(function (err, user) {
+            console.log('get a user', err, user);
+          });
+
           getLvlAccessToken(req.query.code, function (err, data) {
             console.log('getAccessToken cb', err, data); 
+//            user.levelware = {
+//              accessToken : JSON.parse(data)
+//            }
+
             // @@STUB for db backend - do some save magic here
-            db.user.levelware = {
-                accessToken : JSON.parse(data) // {accessToken : :tok, token_type : 'Bearer'}
-            };
-            res.json(db.user);
+            // db.user.levelware = {
+            //    accessToken : JSON.parse(data) // {accessToken : :tok, token_type : 'Bearer'}
+            // };
+
+//            user.save(function (err) {
+ //             res.json(db.user);
+  //          });
           });
         });
         
