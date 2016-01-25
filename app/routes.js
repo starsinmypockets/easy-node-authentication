@@ -158,10 +158,17 @@ module.exports = function(app, passport) {
             console.log('lvl-c-2', JSON.parse(data).access_token, req.session);
 
             // now save the token(s) with the user!
-            User.findById(req.session.passport.user, function (err, doc) {
+            // @@NOTE - I'm cheating!! There should be
+            // a session user or some sane way to get
+            // the current user: req.session.passport.user ???
+            User.findById('56a10e36d2132a6b0a0b9316', function (err, doc) {
               if (err) console.log(err);
               console.log("lvl-c-3", doc);
-              res.json({ "access_token" : req.query.code , 'session' : req.session });
+              doc.levelware.accessToken = req.query.code;
+              doc.save(function (err) {
+                if (err) console.log('ERR', err);
+                res.json(doc); 
+              });
             });
           });
         });
