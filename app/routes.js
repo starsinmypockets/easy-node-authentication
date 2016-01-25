@@ -155,13 +155,13 @@ module.exports = function(app, passport) {
           
           // Use the auth token and get an access token`
           getLvlAccessToken(req.query.code, function (err, data) {
-            console.log('lvl-c-2', JSON.parse(data).access_token);
+            console.log('lvl-c-2', JSON.parse(data).access_token, req.session);
 
             // now save the token(s) with the user!
             User.findById(req.session.passport.user, function (err, doc) {
               if (err) console.log(err);
               console.log("lvl-c-3", doc);
-              res.json({ "access_token" : req.query.code });
+              res.json({ "access_token" : req.query.code , 'session' : req.session });
             });
           });
         });
