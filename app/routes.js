@@ -1,13 +1,9 @@
-// @@STUB for DB backend
-var db = {
-  user : {
-    'username' : 'pjwalker76@gmail.com'
-  }
-}
-
 module.exports = function(app, passport) {
 
-          console.log('DIR', __dirname);
+  app.use(function (req, res, next) {
+    console.log('>>>>',req.users, req.session, '<<<<');
+    next();
+  });
 // normal routes ===============================================================
 
     // show the home page (will also have our login links)
@@ -152,19 +148,22 @@ module.exports = function(app, passport) {
         
         app.get('/connect/levelware', passport.authenticate('levelware', { scope : ['read-only', 'profile'] }));
 
-        // the callback after google has authorized the user
+        // the callback after LEVELWARE has authorized the user contains the auth code
         app.get('/connect/levelware/callback', function (req, res) {
           var access_token;
+          var User = require('./models/user');
           
-          getTestUser(function (sessionUser) {
-            // Now use the auth token and get an access token
-            getLvlAccessToken(req.query.code, function (err, data) {
-              sessionUser.levelware.accessToken = JSON.parse(data).access_token;
-              sessionUser.save(function (err) {
-                res.json(sessionUser.toObject());
-              });
+          // Use the auth token and get an access token`
+          getLvlAccessToken(req.query.code, function (err, data) {
+            console.log('lvl-c-2', JSON.parse(data).access_token);
+
+            // now save the token(s) with the user!
+            User.findById(req.session.passport.user, function (err, doc) {
+              if (err) console.log(err);
+              console.log("lvl-c-3", doc);
+              res.json({ "access_token" : req.query.code });
             });
-         });
+          });
         });
         
         // Test Bearer token - this shoud return a user object
@@ -172,7 +171,7 @@ module.exports = function(app, passport) {
             getTestUser(function (sessionUser) { 
               testApiAccess({accessToken : sessionUser.levelware.accessToken}, function (err, data) {
                 console.log('Test has access', err, data);
-                return res.json(JSON.parse(data));
+                return res.json(data);
               });
             });
         });
@@ -256,6 +255,7 @@ function isLoggedIn(req, res, next) {
  *
  **/
 function getLvlAccessToken (code, fn) {
+  console.log("glt->0");
   var resData;
   var querystring = require('querystring');
   var http = require('http');
@@ -280,6 +280,7 @@ function getLvlAccessToken (code, fn) {
       }
   };
 
+  console.log('glt->1', options);
   var rdata;
   var r = http.request(options, function (response) {
     console.log('status', response.statusCode);
@@ -303,6 +304,7 @@ function getLvlAccessToken (code, fn) {
     fn(err);
   });
 
+  console.log('glt->UGH');
   // write data to request body
   r.write(postData);
   r.end();         
